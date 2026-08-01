@@ -49,13 +49,12 @@ export default function HistoryScreen() {
       <View style={{
         flexDirection: 'row', alignItems: 'center', gap: 12,
         paddingHorizontal: 14, paddingVertical: 10,
-        borderBottomWidth: 1, borderBottomColor: theme.border,
       }}>
         <TouchableOpacity
           onPress={() => router.back()}
           style={{
             width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-            backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
+            backgroundColor: theme.card,
           }}
         >
           <Ionicons name="chevron-back" size={19} color={theme.text} />
@@ -82,7 +81,7 @@ export default function HistoryScreen() {
               activeOpacity={0.7}
               style={{
                 flexDirection: 'row', alignItems: 'center', gap: 12,
-                backgroundColor: theme.card, borderRadius: 16, borderWidth: 1, borderColor: theme.border,
+                backgroundColor: theme.card, borderRadius: 16,
                 paddingHorizontal: 14, paddingVertical: 12, marginBottom: 8,
               }}
             >
