@@ -13,7 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/theme';
 import { ChatMessage, ChatSession } from '@/types';
 import { getSession, saveSession, getAiSettings } from '@/hooks/storage/chat';
-import { sendChatMessage, AiRequestError } from '@/hooks/ai/client';
+import { streamChatMessage, AiRequestError } from '@/hooks/ai/client';
 import { APP_NAME } from '@/constants';
 
 const newId = () => Crypto.randomUUID();
@@ -109,24 +109,44 @@ export default function ChatScreen() {
     listRef.current?.scrollToEnd({ animated: true });
 
     const ai = getAiSettings();
+    let streamed = '';
+    let gotFirstDelta = false;
+
     try {
-      const result = await sendChatMessage(
+      await streamChatMessage(
         [...session.messages, userMsg],
         { baseUrl: ai.baseUrl, apiKey: ai.apiKey, model: session.model || ai.model },
+        (chunk) => {
+          streamed += chunk;
+          gotFirstDelta = true;
+          setSession(prev => {
+            const next = {
+              ...prev,
+              messages: prev.messages.map(m =>
+                m.id === pendingMsg.id ? { ...m, content: streamed, pending: false } : m
+              ),
+            };
+            saveSession(next);
+            return next;
+          });
+        },
       );
-      const finalMsg: ChatMessage = { ...pendingMsg, content: result.content, pending: false };
-      persist({
-        ...withUser,
-        messages: withUser.messages.map(m => (m.id === pendingMsg.id ? finalMsg : m)),
-        updatedAt: Date.now(),
-      });
+      // Kalau stream berhasil tapi kosong (misal koneksi putus di awal)
+      if (!gotFirstDelta) throw new AiRequestError('Provider mengembalikan response kosong.');
     } catch (e) {
       const msg = e instanceof AiRequestError ? e.message : 'Terjadi kesalahan tak terduga.';
-      const errMsg: ChatMessage = { ...pendingMsg, content: msg, pending: false, error: true };
-      persist({
-        ...withUser,
-        messages: withUser.messages.map(m => (m.id === pendingMsg.id ? errMsg : m)),
-        updatedAt: Date.now(),
+      setSession(prev => {
+        const next = {
+          ...prev,
+          messages: prev.messages.map(m =>
+            m.id === pendingMsg.id
+              ? { ...m, content: gotFirstDelta ? streamed : msg, pending: false, error: !gotFirstDelta }
+              : m
+          ),
+          updatedAt: Date.now(),
+        };
+        saveSession(next);
+        return next;
       });
     } finally {
       setSending(false);
