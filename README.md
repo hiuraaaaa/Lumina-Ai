@@ -31,12 +31,44 @@ Untuk pemakaian serius/production, pertimbangkan:
 - Jangan hardcode API key di kode — biarkan user isi sendiri lewat Settings
 - Cek ulang ToS/kebijakan pembayaran mereka sebelum top-up
 
-## Struktur penting
+## Arsitektur
+
 ```
-app/(tabs)/index.tsx      Layar Chat
-app/(tabs)/history.tsx    Riwayat percakapan
-app/(tabs)/profile.tsx    Settings (provider AI + tema)
-hooks/ai/client.ts        Client OpenAI-compatible + fallback
-hooks/storage/chat.ts     Storage sesi chat & settings AI (MMKV)
-hooks/theme.ts            Sistem tema (dipertahankan dari base lama)
+app/                          Routing doang (Expo Router) — thin re-export,
+                               semua logic ada di features/. Kalau nambah
+                               layar baru: bikin file di features/<nama>/screens/,
+                               lalu re-export 1 baris di sini.
+
+features/
+  chat/screens/ChatScreen.tsx      Layar Chat
+  history/screens/HistoryScreen.tsx Riwayat percakapan
+  settings/
+    screens/SettingsScreen.tsx      Settings (provider AI + tema)
+    components/ThemePickerModal.tsx Modal pemilih tema (khusus settings)
+
+lib/                           Infrastruktur — dipakai lintas fitur
+  ai/client.ts                 Client AI OpenAI-compatible + fallback + streaming
+  storage/chat.ts              Persistence (MMKV): sesi chat & AI settings
+  theme/theme.ts               State/hook tema aktif
+  theme/themes.ts              Definisi palet warna (12 tema)
+
+components/ui/                 Design system generik (dipakai fitur mana pun)
+  shared.tsx                   Card, SectionLabel, SettingRow
+  Skeleton.tsx, OfflinePage.tsx, MaintenancePage.tsx, DebugOverlay.tsx
+
+config/app.ts                  Konstanta app-wide (nama app, default provider AI)
+types/index.ts                 Kontrak data (ChatMessage, ChatSession, AiSettings)
 ```
+
+**Prinsip:** `app/` gak boleh isi logic, cuma nunjuk ke `features/`. Tiap fitur
+self-contained (screen + component + hook miliknya sendiri). Kalau sesuatu
+dipakai di 2+ fitur, naikkan ke `components/ui/` atau `lib/`. Ini bikin nambah
+fitur baru gak nyenggol kode fitur lain, dan gampang di-trace kalau ada error.
+
+**Cara nambah fitur baru** (misal "image gen"):
+1. `features/image-gen/screens/ImageGenScreen.tsx`
+2. `app/image-gen.tsx` → `export { default } from '@/features/image-gen/screens/ImageGenScreen';`
+3. Kalau butuh state/logic sendiri → `features/image-gen/hooks/useImageGen.ts`
+4. Kalau butuh API call baru → tambah di `lib/ai/client.ts` atau bikin `lib/ai/image.ts`
+
+

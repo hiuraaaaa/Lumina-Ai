@@ -7,7 +7,7 @@ import Animated, {
   FadeInDown, useSharedValue, withRepeat,
   withSequence, withTiming, useAnimatedStyle,
 } from 'react-native-reanimated';
-import { useTheme } from '@/hooks/theme';
+import { useTheme } from '@/lib/theme/theme';
 
 interface Props {
   message?: string;

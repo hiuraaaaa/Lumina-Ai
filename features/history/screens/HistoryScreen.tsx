@@ -1,4 +1,4 @@
-// app/(tabs)/history.tsx — Daftar riwayat chat
+// app/history.tsx — Daftar riwayat chat
 import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,9 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
-import { useTheme } from '@/hooks/theme';
+import { useTheme } from '@/lib/theme/theme';
 import { ChatSession } from '@/types';
-import { getSessions, deleteSession } from '@/hooks/storage/chat';
+import { getSessions, deleteSession } from '@/lib/storage/chat';
 
 function formatDate(ts: number) {
   const d = new Date(ts);
@@ -29,7 +29,7 @@ export default function HistoryScreen() {
 
   const handleOpen = (id: string) => {
     Haptics.selectionAsync();
-    router.push({ pathname: '/(tabs)', params: { sessionId: id } } as any);
+    router.push({ pathname: '/', params: { sessionId: id } });
   };
 
   const handleDelete = (id: string) => {
@@ -46,8 +46,21 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }} edges={['top']}>
-      <View style={{ paddingHorizontal: 20, paddingVertical: 12 }}>
-        <Text style={{ color: theme.text, fontSize: 18, fontWeight: '900' }}>Riwayat</Text>
+      <View style={{
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        paddingHorizontal: 14, paddingVertical: 10,
+        borderBottomWidth: 1, borderBottomColor: theme.border,
+      }}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={{
+            width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+            backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
+          }}
+        >
+          <Ionicons name="chevron-back" size={19} color={theme.text} />
+        </TouchableOpacity>
+        <Text style={{ color: theme.text, fontSize: 16, fontWeight: '900' }}>Riwayat</Text>
       </View>
 
       {sessions.length === 0 ? (

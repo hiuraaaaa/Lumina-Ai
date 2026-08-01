@@ -3,8 +3,8 @@ import { View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useTheme, setGlobalTheme } from '@/hooks/theme';
-import { THEMES } from '@/constants';
+import { useTheme, setGlobalTheme } from '@/lib/theme/theme';
+import { THEMES } from '@/lib/theme/themes';
 
 export function ThemePickerModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const theme = useTheme();

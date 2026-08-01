@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Image } from 'expo-image';
 import Animated, {
   useSharedValue, useAnimatedStyle,
-  withRepeat, withSequence, withTiming, withSpring,
+  withRepeat, withSequence, withTiming,
   Easing, FadeIn,
 } from 'react-native-reanimated';
-import { COLORS, LOGO_URL } from '@/constants';
+import { COLORS } from '@/lib/theme/themes';
 
 const { width } = Dimensions.get('window');
 
@@ -42,19 +41,10 @@ export default function OfflinePage({ onRetry }: Props) {
 
       <Animated.View style={[s.center, floatStyle]}>
 
-        {/* Logo */}
-        <Animated.View style={[s.logoWrap, logoStyle]}>
-          <Image
-            source={{ uri: LOGO_URL }}
-            style={s.logo}
-            contentFit="contain"
-          />
-        </Animated.View>
-
         {/* Icon wifi off */}
-        <View style={s.iconWrap}>
+        <Animated.View style={[s.iconWrap, logoStyle]}>
           <Text style={s.iconEmoji}>📡</Text>
-        </View>
+        </Animated.View>
 
         <Text style={s.title}>Tidak Ada Koneksi</Text>
         <Text style={s.subtitle}>

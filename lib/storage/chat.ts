@@ -1,7 +1,7 @@
 // hooks/storage/chat.ts — MMKV storage untuk chat sessions & AI settings
 import { createMMKV } from 'react-native-mmkv';
 import { ChatSession, AiSettings } from '@/types';
-import { DEFAULT_AI_BASE_URL, DEFAULT_AI_MODEL } from '@/constants';
+import { DEFAULT_AI_BASE_URL, DEFAULT_AI_MODEL } from '@/config/app';
 
 export const storageMain = createMMKV({ id: 'nefuai-main' });
 

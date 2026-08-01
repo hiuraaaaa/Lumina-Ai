@@ -1,20 +1,21 @@
-// app/(tabs)/profile.tsx — Settings: provider AI (base URL/API key/model) + tema
+// app/settings.tsx — Settings: provider AI (base URL/API key/model) + tema
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
-import { useTheme } from '@/hooks/theme';
+import { useTheme } from '@/lib/theme/theme';
 import { AiSettings } from '@/types';
-import { getAiSettings, saveAiSettings, clearSessions } from '@/hooks/storage/chat';
-import { AI_MODEL_PRESETS, APP_NAME } from '@/constants';
-import { SectionLabel, Card, SettingRow } from '@/features/profile/components/shared';
-import { ThemePickerModal } from '@/features/profile/components/ThemePickerModal';
+import { getAiSettings, saveAiSettings, clearSessions } from '@/lib/storage/chat';
+import { AI_MODEL_PRESETS, APP_NAME } from '@/config/app';
+import { SectionLabel, Card, SettingRow } from '@/components/ui/shared';
+import { ThemePickerModal } from '@/features/settings/components/ThemePickerModal';
 
 export default function SettingsScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const [settings, setSettings] = useState<AiSettings>(getAiSettings());
   const [showKey, setShowKey] = useState(false);
   const [themeModal, setThemeModal] = useState(false);
@@ -49,9 +50,23 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={{ paddingHorizontal: 20, paddingVertical: 12 }}>
-          <Text style={{ color: theme.text, fontSize: 18, fontWeight: '900' }}>Settings</Text>
-          <Text style={{ color: theme.subtext, fontSize: 11, marginTop: 2 }}>{APP_NAME}</Text>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', gap: 12,
+          paddingHorizontal: 14, paddingVertical: 10,
+        }}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{
+              width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+              backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
+            }}
+          >
+            <Ionicons name="chevron-back" size={19} color={theme.text} />
+          </TouchableOpacity>
+          <View>
+            <Text style={{ color: theme.text, fontSize: 16, fontWeight: '900' }}>Settings</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10 }}>{APP_NAME}</Text>
+          </View>
         </View>
 
         <SectionLabel label="Provider AI" />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { THEMES, Theme } from '@/constants';
+import { THEMES, Theme } from '@/lib/theme/themes';
 
 const THEME_KEY = 'nefusoft_theme';
 

@@ -3,8 +3,8 @@ import edgeToEdge from 'react-native-edge-to-edge/expo';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Lumina',
-  slug: 'lumina',
+  name: 'Nefu AI',
+  slug: 'nefu-ai',
   version: '1.0.0',
   orientation: 'default',
   icon: './assets/icon.png',
@@ -31,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#08080a',
     },
     // TODO: ganti package name kalau mau publish sendiri
-    package: 'com.lumina.app',
+    package: 'com.nefuai.app',
     jsEngine: 'hermes',
     enableProguardInReleaseBuilds: true,
     enableShrinkResourcesInReleaseBuilds: true,
@@ -54,7 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     }],
     ['expo-font', { fonts: [] }],
   ],
-  scheme: 'lumina',
+  scheme: 'nefuai',
   experiments: {
     typedRoutes: true,
   },
@@ -63,4 +63,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: '5e9c90d8-6e1d-4047-b229-5f04cc627d45',
     },
   },
+  // TODO: kalau ganti akun EAS, jalanin `eas init` lagi buat update projectId di atas
 });

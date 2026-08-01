@@ -5,8 +5,8 @@ import { useEffect, useState, useCallback, useRef, Component, ReactNode } from '
 import { Text, ScrollView, AppState, AppStateStatus } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import NetInfo from '@react-native-community/netinfo';
-import { loadSavedTheme, useTheme } from '@/hooks/theme';
-import OfflinePage from '@/components/OfflinePage';
+import { loadSavedTheme, useTheme } from '@/lib/theme/theme';
+import OfflinePage from '@/components/ui/OfflinePage';
 import { SystemBars } from 'react-native-edge-to-edge';
 import { useFonts } from 'expo-font';
 import { Unbounded_500Medium, Unbounded_700Bold } from '@expo-google-fonts/unbounded';
@@ -84,7 +84,9 @@ function AppLayout() {
       <SystemBars style={statusBarStyle} />
       <StatusBar style={statusBarStyle} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.bg }, animation: 'fade' }}>
-        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="history" options={{ animation: 'slide_from_left' }} />
+        <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
       </Stack>
     </>
   );

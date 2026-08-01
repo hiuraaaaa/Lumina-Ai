@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   cancelAnimation,
 } from 'react-native-reanimated';
-import { COLORS } from '@/constants';
+import { COLORS } from '@/lib/theme/themes';
 
 const { width } = Dimensions.get('window');
 

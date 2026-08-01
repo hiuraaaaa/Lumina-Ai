@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx — Layar Chat utama
+// app/index.tsx — Layar Chat utama
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
@@ -10,11 +10,11 @@ import * as Haptics from 'expo-haptics';
 import * as Crypto from 'expo-crypto';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { useTheme } from '@/hooks/theme';
+import { useTheme } from '@/lib/theme/theme';
 import { ChatMessage, ChatSession } from '@/types';
-import { getSession, saveSession, getAiSettings } from '@/hooks/storage/chat';
-import { streamChatMessage, AiRequestError } from '@/hooks/ai/client';
-import { APP_NAME } from '@/constants';
+import { getSession, saveSession, getAiSettings } from '@/lib/storage/chat';
+import { streamChatMessage, AiRequestError } from '@/lib/ai/client';
+import { APP_NAME } from '@/config/app';
 
 const newId = () => Crypto.randomUUID();
 
@@ -167,26 +167,51 @@ export default function ChatScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }} edges={['top', 'bottom']}>
       <View style={{
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 20, paddingVertical: 12,
+        paddingHorizontal: 14, paddingVertical: 10,
+        borderBottomWidth: 1, borderBottomColor: theme.border,
       }}>
-        <View>
-          <Text style={{ color: theme.text, fontSize: 18, fontWeight: '900' }}>{APP_NAME}</Text>
-          <Text style={{ color: theme.subtext, fontSize: 11 }} numberOfLines={1}>
-            {session.model}
-          </Text>
-        </View>
         <TouchableOpacity
-          onPress={handleNewChat}
+          onPress={() => { Haptics.selectionAsync(); router.push('/history'); }}
           style={{
             width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
             backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
           }}
         >
-          <Ionicons name="add" size={20} color={theme.accent} />
+          <Ionicons name="time-outline" size={19} color={theme.text} />
         </TouchableOpacity>
+
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: theme.text, fontSize: 15, fontWeight: '900' }} numberOfLines={1}>
+            {APP_NAME}
+          </Text>
+          <Text style={{ color: theme.subtext, fontSize: 10 }} numberOfLines={1}>
+            {session.model}
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TouchableOpacity
+            onPress={handleNewChat}
+            style={{
+              width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+              backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
+            }}
+          >
+            <Ionicons name="add" size={20} color={theme.accent} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => { Haptics.selectionAsync(); router.push('/settings'); }}
+            style={{
+              width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+              backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
+            }}
+          >
+            <Ionicons name="settings-outline" size={18} color={theme.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {session.messages.length === 0 ? (
@@ -210,7 +235,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={{
           flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-          paddingHorizontal: 16, paddingVertical: 10, paddingBottom: 20,
+          paddingHorizontal: 16, paddingVertical: 10, paddingBottom: 10,
           borderTopWidth: 1, borderTopColor: theme.border,
         }}>
           <TextInput

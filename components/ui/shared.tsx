@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '@/hooks/theme';
+import { useTheme } from '@/lib/theme/theme';
 
 export function SectionLabel({ label }: { label: string }) {
   const theme = useTheme();
