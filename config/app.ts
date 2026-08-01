@@ -4,7 +4,7 @@
 // jadi treat sebagai provider "best effort" — sudah ada fallback di lib/ai/client.ts.
 export const DEFAULT_AI_BASE_URL = 'https://router.bynara.id/v1';
 export const DEFAULT_AI_MODEL = 'claude-sonnet-4.5';
-export const APP_NAME = 'Nefu AI';
+export const APP_NAME = 'Lumina';
 
 export const AI_MODEL_PRESETS = [
   { id: 'claude-sonnet-4.5', label: 'Claude Sonnet 4.5' },
