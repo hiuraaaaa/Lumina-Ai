@@ -1,0 +1,45 @@
+{
+  "cli": {
+    "version": ">= 7.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "image": "sdk-56"
+      },
+      "channel": "development"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "image": "sdk-56"
+      },
+      "channel": "preview"
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "image": "sdk-56"
+      },
+      "channel": "production"
+    },
+    "tv": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "image": "sdk-56"
+      },
+      "env": {
+        "EXPO_TV": "1"
+      },
+      "channel": "preview"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
