@@ -3,8 +3,8 @@ import edgeToEdge from 'react-native-edge-to-edge/expo';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Nefu AI',
-  slug: 'nefu-ai',
+  name: 'Lumina',
+  slug: 'lumina',
   version: '1.0.0',
   orientation: 'default',
   icon: './assets/icon.png',
@@ -13,6 +13,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     image: './assets/splash.png',
     resizeMode: 'contain',
     backgroundColor: '#08080a',
+  },
+  updates: {
+    url: 'https://u.expo.dev/5e9c90d8-6e1d-4047-b229-5f04cc627d45',
   },
   runtimeVersion: {
     policy: 'appVersion',
@@ -28,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#08080a',
     },
     // TODO: ganti package name kalau mau publish sendiri
-    package: 'com.nefuai.app',
+    package: 'com.lumina.app',
     jsEngine: 'hermes',
     enableProguardInReleaseBuilds: true,
     enableShrinkResourcesInReleaseBuilds: true,
@@ -51,10 +54,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     }],
     ['expo-font', { fonts: [] }],
   ],
-  scheme: 'nefuai',
+  scheme: 'lumina',
   experiments: {
     typedRoutes: true,
   },
-  // TODO: isi extra.eas.projectId kalau mau pakai EAS Build punya sendiri
-  // (jalankan `eas init` di project ini)
+  extra: {
+    eas: {
+      projectId: '5e9c90d8-6e1d-4047-b229-5f04cc627d45',
+    },
+  },
 });
