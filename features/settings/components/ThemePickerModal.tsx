@@ -17,7 +17,6 @@ export function ThemePickerModal({ visible, onClose }: { visible: boolean; onClo
               backgroundColor: theme.card,
               borderTopLeftRadius: 24, borderTopRightRadius: 24,
               paddingBottom: 40, paddingTop: 16,
-              borderWidth: 1, borderColor: theme.border,
             }}>
               <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.15)', alignSelf: 'center', marginBottom: 20 }} />
               <Text style={{ color: theme.text, fontSize: 16, fontWeight: '900', paddingHorizontal: 20, marginBottom: 16 }}>Pilih Tema</Text>
@@ -31,8 +30,7 @@ export function ThemePickerModal({ visible, onClose }: { visible: boolean; onClo
                       style={{
                         width: 110, borderRadius: 14, padding: 12,
                         backgroundColor: t.bg,
-                        borderWidth: isActive ? 2 : 1,
-                        borderColor: isActive ? t.accent : 'rgba(255,255,255,0.06)',
+                        opacity: isActive ? 1 : 0.75,
                       }}
                     >
                       <View style={{ gap: 4, marginBottom: 8 }}>
