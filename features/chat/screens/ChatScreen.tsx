@@ -2,19 +2,24 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Keyboard,
+  KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as Crypto from 'expo-crypto';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withRepeat, withSequence, withTiming, withDelay, Easing,
+} from 'react-native-reanimated';
 
 import { useTheme } from '@/lib/theme/theme';
 import { ChatMessage, ChatSession } from '@/types';
 import { getSession, saveSession, getAiSettings } from '@/lib/storage/chat';
 import { streamChatMessage, AiRequestError } from '@/lib/ai/client';
 import { APP_NAME } from '@/config/app';
+import { SideMenu } from '@/components/ui/SideMenu';
 
 const newId = () => Crypto.randomUUID();
 
@@ -37,30 +42,74 @@ function useKeyboardOffset() {
   return height;
 }
 
-function Bubble({ message }: { message: ChatMessage }) {
+// Indikator "sedang mengetik" — dot yang napas (opacity pulse), bukan spinner muter.
+function TypingDots() {
+  const theme = useTheme();
+  const d1 = useSharedValue(0.25);
+  const d2 = useSharedValue(0.25);
+  const d3 = useSharedValue(0.25);
+
+  useEffect(() => {
+    const loop = (sv: typeof d1, delay: number) => {
+      sv.value = withDelay(delay, withRepeat(
+        withSequence(
+          withTiming(1, { duration: 420, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.25, { duration: 420, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1,
+        false,
+      ));
+    };
+    loop(d1, 0);
+    loop(d2, 140);
+    loop(d3, 280);
+  }, []);
+
+  const s1 = useAnimatedStyle(() => ({ opacity: d1.value }));
+  const s2 = useAnimatedStyle(() => ({ opacity: d2.value }));
+  const s3 = useAnimatedStyle(() => ({ opacity: d3.value }));
+  const dotStyle = { width: 6, height: 6, borderRadius: 3, backgroundColor: theme.subtext };
+
+  return (
+    <View style={{ flexDirection: 'row', gap: 5, paddingVertical: 6 }}>
+      <Animated.View style={[dotStyle, s1]} />
+      <Animated.View style={[dotStyle, s2]} />
+      <Animated.View style={[dotStyle, s3]} />
+    </View>
+  );
+}
+
+// Tanpa bubble buat balasan AI (flat text, kek Claude). User tetap dikasih
+// fill lembut biar kebaca siapa ngomong apa — borderless, no stroke.
+function MessageBlock({ message }: { message: ChatMessage }) {
   const theme = useTheme();
   const isUser = message.role === 'user';
+
+  if (isUser) {
+    return (
+      <View style={{ alignItems: 'flex-end', marginVertical: 6 }}>
+        <View style={{
+          maxWidth: '86%',
+          backgroundColor: theme.card,
+          borderRadius: 18,
+          paddingHorizontal: 14,
+          paddingVertical: 10,
+        }}>
+          <Text style={{ color: theme.text, fontSize: 14, lineHeight: 21 }}>{message.content}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={{
-      alignSelf: isUser ? 'flex-end' : 'flex-start',
-      maxWidth: '84%',
-      marginVertical: 5,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: 16,
-      borderBottomRightRadius: isUser ? 4 : 16,
-      borderBottomLeftRadius: isUser ? 16 : 4,
-      backgroundColor: isUser ? theme.accent : theme.card,
-      borderWidth: isUser ? 0 : 1,
-      borderColor: theme.border,
-    }}>
+    <View style={{ marginVertical: 6, paddingRight: 20 }}>
       {message.pending ? (
-        <ActivityIndicator size="small" color={isUser ? '#000' : theme.accent} />
+        <TypingDots />
       ) : (
         <Text style={{
-          color: isUser ? '#000' : (message.error ? '#e63946' : theme.text),
+          color: message.error ? '#e63946' : theme.text,
           fontSize: 14,
-          lineHeight: 20,
+          lineHeight: 22,
         }}>
           {message.content}
         </Text>
@@ -93,6 +142,7 @@ export default function ChatScreen() {
 
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const keyboardOffset = useKeyboardOffset();
 
   useEffect(() => {
@@ -101,7 +151,7 @@ export default function ChatScreen() {
     }
   }, [keyboardOffset]);
 
-  // Kalau dibuka dari History dengan sessionId baru, reload sesi tsb
+  // Kalau dibuka dengan sessionId baru (misal via deep link), reload sesi tsb
   useEffect(() => {
     if (params.sessionId) {
       const existing = getSession(params.sessionId);
@@ -180,7 +230,6 @@ export default function ChatScreen() {
   }, [input, sending, session, persist]);
 
   const handleNewChat = useCallback(() => {
-    Haptics.selectionAsync();
     const ai = getAiSettings();
     setSession({
       id: newId(),
@@ -192,21 +241,23 @@ export default function ChatScreen() {
     });
   }, []);
 
+  const handleOpenSession = useCallback((id: string) => {
+    const existing = getSession(id);
+    if (existing) setSession(existing);
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }} edges={['top', 'bottom']}>
       <View style={{
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 14, paddingVertical: 10,
-        borderBottomWidth: 1, borderBottomColor: theme.border,
       }}>
         <TouchableOpacity
-          onPress={() => { Haptics.selectionAsync(); router.push('/history'); }}
-          style={{
-            width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-            backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
-          }}
+          onPress={() => { Haptics.selectionAsync(); setMenuOpen(true); }}
+          hitSlop={8}
+          style={{ width: 38, height: 38, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Ionicons name="time-outline" size={19} color={theme.text} />
+          <Ionicons name="menu-outline" size={22} color={theme.text} />
         </TouchableOpacity>
 
         <View style={{ alignItems: 'center' }}>
@@ -218,26 +269,13 @@ export default function ChatScreen() {
           </Text>
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <TouchableOpacity
-            onPress={handleNewChat}
-            style={{
-              width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-              backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
-            }}
-          >
-            <Ionicons name="add" size={20} color={theme.accent} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => { Haptics.selectionAsync(); router.push('/settings'); }}
-            style={{
-              width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-              backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
-            }}
-          >
-            <Ionicons name="settings-outline" size={18} color={theme.text} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          onPress={() => { Haptics.selectionAsync(); handleNewChat(); }}
+          hitSlop={8}
+          style={{ width: 38, height: 38, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Ionicons name="create-outline" size={20} color={theme.accent} />
+        </TouchableOpacity>
       </View>
 
       {session.messages.length === 0 ? (
@@ -253,7 +291,7 @@ export default function ChatScreen() {
           style={{ flex: 1 }}
           data={session.messages}
           keyExtractor={m => m.id}
-          renderItem={({ item }) => <Bubble message={item} />}
+          renderItem={({ item }) => <MessageBlock message={item} />}
           contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
         />
@@ -266,7 +304,6 @@ export default function ChatScreen() {
         <View style={{
           flexDirection: 'row', alignItems: 'flex-end', gap: 8,
           paddingHorizontal: 16, paddingVertical: 10, paddingBottom: 10,
-          borderTopWidth: 1, borderTopColor: theme.border,
         }}>
           <TextInput
             value={input}
@@ -276,8 +313,7 @@ export default function ChatScreen() {
             multiline
             style={{
               flex: 1, maxHeight: 120, color: theme.text, fontSize: 14,
-              backgroundColor: theme.card, borderRadius: 16,
-              borderWidth: 1, borderColor: theme.border,
+              backgroundColor: theme.card, borderRadius: 18,
               paddingHorizontal: 14, paddingVertical: 10,
             }}
           />
@@ -293,6 +329,15 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      <SideMenu
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onNewChat={handleNewChat}
+        onOpenSession={handleOpenSession}
+        onOpenSettings={() => router.push('/settings')}
+        activeSessionId={session.id}
+      />
     </SafeAreaView>
   );
 }
