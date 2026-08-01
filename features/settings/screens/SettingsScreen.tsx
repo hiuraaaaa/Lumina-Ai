@@ -58,7 +58,7 @@ export default function SettingsScreen() {
             onPress={() => router.back()}
             style={{
               width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-              backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
+              backgroundColor: theme.card,
             }}
           >
             <Ionicons name="chevron-back" size={19} color={theme.text} />
@@ -83,7 +83,7 @@ export default function SettingsScreen() {
                 placeholderTextColor={theme.subtext}
                 style={{
                   color: theme.text, fontSize: 13, backgroundColor: theme.bg,
-                  borderRadius: 10, borderWidth: 1, borderColor: theme.border,
+                  borderRadius: 10,
                   paddingHorizontal: 12, paddingVertical: 10,
                 }}
               />
@@ -102,7 +102,7 @@ export default function SettingsScreen() {
                   placeholderTextColor={theme.subtext}
                   style={{
                     flex: 1, color: theme.text, fontSize: 13, backgroundColor: theme.bg,
-                    borderRadius: 10, borderWidth: 1, borderColor: theme.border,
+                    borderRadius: 10,
                     paddingHorizontal: 12, paddingVertical: 10,
                   }}
                 />
@@ -123,8 +123,7 @@ export default function SettingsScreen() {
                       onPress={() => update({ model: m.id })}
                       style={{
                         paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-                        backgroundColor: active ? theme.accent : theme.bg,
-                        borderWidth: 1, borderColor: active ? theme.accent : theme.border,
+                        backgroundColor: active ? theme.accent : theme.card,
                       }}
                     >
                       <Text style={{ color: active ? '#000' : theme.text, fontSize: 11, fontWeight: '700' }}>
@@ -143,7 +142,7 @@ export default function SettingsScreen() {
                 placeholderTextColor={theme.subtext}
                 style={{
                   marginTop: 8, color: theme.text, fontSize: 13, backgroundColor: theme.bg,
-                  borderRadius: 10, borderWidth: 1, borderColor: theme.border,
+                  borderRadius: 10,
                   paddingHorizontal: 12, paddingVertical: 10,
                 }}
               />
