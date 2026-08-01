@@ -1,7 +1,7 @@
 // app/index.tsx — Layar Chat utama
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, FlatList,
+  View, Text, TouchableOpacity, FlatList,
   KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,6 +21,7 @@ import { streamChatMessage, AiRequestError } from '@/lib/ai/client';
 import { APP_NAME } from '@/config/app';
 import { SideMenu } from '@/components/ui/SideMenu';
 import { Markdown } from '@/components/ui/Markdown';
+import { ChatInput } from '@/components/ui/ChatInput';
 
 const newId = () => Crypto.randomUUID();
 
@@ -273,57 +274,41 @@ export default function ChatScreen() {
         </TouchableOpacity>
       </View>
 
-      {session.messages.length === 0 ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}>
-          <Ionicons name="sparkles-outline" size={36} color={theme.subtext} />
-          <Text style={{ color: theme.subtext, fontSize: 13, textAlign: 'center', marginTop: 12 }}>
-            Mulai percakapan baru. Pastikan API key sudah diisi di tab Settings.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          ref={listRef}
-          style={{ flex: 1 }}
-          data={session.messages}
-          keyExtractor={m => m.id}
-          renderItem={({ item }) => <MessageBlock message={item} />}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
-        />
-      )}
+      <View style={{ flex: 1 }}>
+        {session.messages.length === 0 ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}>
+            <Ionicons name="sparkles-outline" size={36} color={theme.subtext} />
+            <Text style={{ color: theme.subtext, fontSize: 13, textAlign: 'center', marginTop: 12 }}>
+              Mulai percakapan baru. Pastikan API key sudah diisi di tab Settings.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            ref={listRef}
+            style={{ flex: 1 }}
+            data={session.messages}
+            keyExtractor={m => m.id}
+            renderItem={({ item }) => <MessageBlock message={item} />}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 96 }}
+            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+          />
+        )}
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ paddingBottom: Platform.OS === 'android' ? keyboardOffset : 0 }}
-      >
-        <View style={{
-          flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-          paddingHorizontal: 16, paddingVertical: 10, paddingBottom: 10,
-        }}>
-          <TextInput
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0,
+            paddingBottom: Platform.OS === 'android' ? keyboardOffset : 0,
+          }}
+        >
+          <ChatInput
             value={input}
             onChangeText={setInput}
-            placeholder="Tulis pesan..."
-            placeholderTextColor={theme.subtext}
-            multiline
-            style={{
-              flex: 1, maxHeight: 120, color: theme.text, fontSize: 14,
-              backgroundColor: theme.card, borderRadius: 18,
-              paddingHorizontal: 14, paddingVertical: 10,
-            }}
+            onSend={handleSend}
+            sending={sending}
           />
-          <TouchableOpacity
-            onPress={handleSend}
-            disabled={sending || !input.trim()}
-            style={{
-              width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-              backgroundColor: theme.accent, opacity: sending || !input.trim() ? 0.5 : 1,
-            }}
-          >
-            <Ionicons name="arrow-up" size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
 
       <SideMenu
         visible={menuOpen}
