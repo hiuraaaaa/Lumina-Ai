@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,25 @@ import { streamChatMessage, AiRequestError } from '@/lib/ai/client';
 import { APP_NAME } from '@/config/app';
 
 const newId = () => Crypto.randomUUID();
+
+// KeyboardAvoidingView gak reliable di Android kalau edge-to-edge aktif
+// (adjustResize native-nya suka gak ke-trigger). Jadi track tinggi keyboard
+// manual lewat event, terus dorong input bar pake padding.
+function useKeyboardOffset() {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      setHeight(e.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setHeight(0));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+  return height;
+}
 
 function Bubble({ message }: { message: ChatMessage }) {
   const theme = useTheme();
@@ -74,6 +93,13 @@ export default function ChatScreen() {
 
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const keyboardOffset = useKeyboardOffset();
+
+  useEffect(() => {
+    if (keyboardOffset > 0) {
+      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
+    }
+  }, [keyboardOffset]);
 
   // Kalau dibuka dari History dengan sessionId baru, reload sesi tsb
   useEffect(() => {
@@ -224,6 +250,7 @@ export default function ChatScreen() {
       ) : (
         <FlatList
           ref={listRef}
+          style={{ flex: 1 }}
           data={session.messages}
           keyExtractor={m => m.id}
           renderItem={({ item }) => <Bubble message={item} />}
@@ -232,7 +259,10 @@ export default function ChatScreen() {
         />
       )}
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ paddingBottom: Platform.OS === 'android' ? keyboardOffset : 0 }}
+      >
         <View style={{
           flexDirection: 'row', alignItems: 'flex-end', gap: 8,
           paddingHorizontal: 16, paddingVertical: 10, paddingBottom: 10,
