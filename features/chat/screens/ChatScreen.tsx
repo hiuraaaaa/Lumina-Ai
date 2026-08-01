@@ -20,6 +20,7 @@ import { getSession, saveSession, getAiSettings } from '@/lib/storage/chat';
 import { streamChatMessage, AiRequestError } from '@/lib/ai/client';
 import { APP_NAME } from '@/config/app';
 import { SideMenu } from '@/components/ui/SideMenu';
+import { Markdown } from '@/components/ui/Markdown';
 
 const newId = () => Crypto.randomUUID();
 
@@ -106,13 +107,7 @@ function MessageBlock({ message }: { message: ChatMessage }) {
       {message.pending ? (
         <TypingDots />
       ) : (
-        <Text style={{
-          color: message.error ? '#e63946' : theme.text,
-          fontSize: 14,
-          lineHeight: 22,
-        }}>
-          {message.content}
-        </Text>
+        <Markdown content={message.content} color={message.error ? '#e63946' : theme.text} />
       )}
     </View>
   );
